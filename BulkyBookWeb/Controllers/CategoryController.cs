@@ -1,5 +1,5 @@
-﻿using BulkyBookWeb.Data;
-using BulkyBookWeb.Models;
+﻿using BulkyBook.Models;
+using BulkyBookWeb.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BulkyBookWeb.Controllers
@@ -23,7 +23,6 @@ namespace BulkyBookWeb.Controllers
         //below create is a GET action method
         public IActionResult Create()
         {
-
            return View();
         }
 
@@ -43,6 +42,8 @@ namespace BulkyBookWeb.Controllers
             {
                 _db.Categories.Add(obj);
                 _db.SaveChanges();
+                //tempdata used below for information not stored but only displayed on the action execution
+                TempData["success"] = "Category created succesfully";
                 //below redirect to the index to show the updated change
                 return RedirectToAction("Index");
             }
@@ -78,17 +79,56 @@ namespace BulkyBookWeb.Controllers
             {
                 ModelState.AddModelError("name", "The Display Order cannot exactly match the Name");
             }
-            //adding the new category to the database and saving the changes
+            //edit an existing category to the database and saving the changes
             //also confirm if the obj is valid
             if (ModelState.IsValid)
             {
-                _db.Categories.Add(obj);
+                _db.Categories.Update(obj);
                 _db.SaveChanges();
+                TempData["success"] = "Category edited succesfully";
                 //below redirect to the index to show the updated change
                 return RedirectToAction("Index");
             }
             //if not valid just return the view
             return View(obj);
+        }
+
+
+        //below DELETE action method
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            var categoryFromDb = _db.Categories.Find(id);
+            //var categoryFromDbFirst = _db.Categories.FirstOrDefault(u => u.Id == id);
+            //var categoryFromDbSingle = _db.Categories.SingleOrDefault(u => u.Id == id);
+
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+            return View(categoryFromDb);
+        }
+
+        //below DELETE action method
+        [HttpPost,ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePOST(int? id)
+        {
+           var obj = _db.Categories.Find(id);
+            if(obj == null)
+            {
+                return NotFound();
+            }
+           
+            _db.Categories.Remove(obj);
+                _db.SaveChanges();
+            TempData["success"] = "Category deleted succesfully";
+            //below redirect to the index to show the updated change
+            return RedirectToAction("Index");       
+           
         }
     }
 }
