@@ -1,5 +1,8 @@
+using BulkyBookDataAccess.Repository;
+using BulkyBookDataAccess.Repository.IRepository;
 using BulkyBookWeb.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +12,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 var app = builder.Build();
 
